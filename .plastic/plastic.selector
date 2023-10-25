@@ -1,0 +1,4 @@
+repository "CookieClicker@PlayForgeTeam@cloud"
+  path "/"
+    br "/main"
+    co "/main"
