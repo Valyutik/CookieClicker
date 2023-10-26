@@ -201,7 +201,6 @@ GameObject:
   m_Component:
   - component: {fileID: 81723575}
   - component: {fileID: 81723574}
-  - component: {fileID: 81723573}
   m_Layer: 0
   m_Name: SceneContext
   m_TagString: Untagged
@@ -209,18 +208,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &81723573
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 81723572}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e345674e79fd4744bf4631a937af3ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &81723574
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -234,8 +221,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _scriptableObjectInstallers: []
-  _monoInstallers:
-  - {fileID: 81723573}
+  _monoInstallers: []
   _installerPrefabs: []
   _autoRun: 1
   OnPreInstall:
@@ -280,7 +266,7 @@ GameObject:
   - component: {fileID: 83439466}
   - component: {fileID: 83439465}
   m_Layer: 5
-  m_Name: CounterText
+  m_Name: ClickCounterText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -921,7 +907,7 @@ GameObject:
   - component: {fileID: 1003783972}
   - component: {fileID: 1003783971}
   - component: {fileID: 1003783974}
-  - component: {fileID: 1003783973}
+  - component: {fileID: 1003783975}
   m_Layer: 0
   m_Name: Cookie
   m_TagString: Untagged
@@ -996,23 +982,6 @@ Transform:
   m_Father: {fileID: 881255876}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1003783973
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1003783970}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 861e68686c499a54185c639a8f4bf8c3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scoreText: {fileID: 615166940}
-  counterText: {fileID: 0}
-  scorePerClickText: {fileID: 1739807041}
-  endGamePanel: {fileID: 112648046}
-  cookieParticlePrefab: {fileID: 3092828306525664085, guid: f9daf4fb44068354388c10df8585a6ad, type: 3}
 --- !u!58 &1003783974
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -1048,6 +1017,23 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.87
+--- !u!114 &1003783975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1003783970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 861e68686c499a54185c639a8f4bf8c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scoreText: {fileID: 615166940}
+  clickCounterText: {fileID: 83439465}
+  scorePerClickText: {fileID: 1739807041}
+  endGamePanel: {fileID: 112648046}
+  cookieParticlePrefab: {fileID: 3092828306525664085, guid: f9daf4fb44068354388c10df8585a6ad, type: 3}
 --- !u!1 &1087812845
 GameObject:
   m_ObjectHideFlags: 0
@@ -1358,7 +1344,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +1
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: e73a58f6e2794ae7b1b7e50b7fb811b0, type: 2}

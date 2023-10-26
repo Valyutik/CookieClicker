@@ -1,12 +1,12 @@
-using UnityEngine;
 using Zenject;
 
-public class GameplayInstaller : MonoInstaller
+namespace _Project.Scripts.Installers
 {
-    
-    
-    public override void InstallBindings()
+    public class GameplayInstaller : MonoInstaller
     {
+        public override void InstallBindings()
+        {
         
+        }
     }
 }

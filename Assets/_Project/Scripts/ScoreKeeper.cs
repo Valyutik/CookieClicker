@@ -5,22 +5,22 @@ using Random = UnityEngine.Random;
 
 namespace _Project.Scripts
 {
-    public class ScoreKeeper
+    public class ScoreKeeper : MonoBehaviour
     {
-        private ScoreView _scoreText;
-        private CounterView _clickCounterText;
-        private ScorePerClickView _scorePerClickText;
-        private EndGamePanelView _endGamePanel;
-        private CookieParticle _cookieParticlePrefab;
+        [SerializeField] private TMP_Text scoreText;
+        [SerializeField] private TMP_Text clickCounterText;
+        [SerializeField] private TMP_Text scorePerClickText;
+        [SerializeField] private Image endGamePanel;
+        [SerializeField] private CookieParticle cookieParticlePrefab;
     
         private int _score;
         private int _counter;
 
-        private ScoreKeeper()
+        private void Start()
         {
-            _scoreText.text = "Очки: " + _score;
+            scoreText.text = "Очки: " + _score;
         
-            _endGamePanel.gameObject.SetActive(false);
+            endGamePanel.gameObject.SetActive(false);
         }
 
         private void OnMouseDown()
@@ -35,35 +35,35 @@ namespace _Project.Scripts
         private void AddScore()
         {
             _counter++;
-            _clickCounterText.text = $"Клики: {_counter}";
+            clickCounterText.text = $"Клики: {_counter}";
 
             switch (_score)
             {
                 case < 20:
                     _score++;
-                    _scorePerClickText.text += "+1 ";
+                    scorePerClickText.text += "+1 ";
                     break;
                 case < 40:
                     _score += 2;
-                    _scorePerClickText.text += "+2 ";
+                    scorePerClickText.text += "+2 ";
                     break;
                 case < 60:
                     _score += 3;
-                    _scorePerClickText.text += "+3 ";
+                    scorePerClickText.text += "+3 ";
                     break;
                 case < 80:
                     _score += 4;
-                    _scorePerClickText.text += "+4 ";
+                    scorePerClickText.text += "+4 ";
                     break;
                 case < 100:
                     _score += 5;
-                    _scorePerClickText.text += "+5 ";
+                    scorePerClickText.text += "+5 ";
                     break;
             }
             
             if (_counter % 20 == 0)
             {
-                _scorePerClickText.text += "\n";
+                scorePerClickText.text += "\n";
             }
         }
 
@@ -71,12 +71,12 @@ namespace _Project.Scripts
         {
             if (_score < 100)
             {
-                _scoreText.text = "Очки: " + _score;
+                scoreText.text = "Очки: " + _score;
             }
             else
             {
-                _scoreText.text = "Очки: " + _score;
-                _endGamePanel.gameObject.SetActive(true);
+                scoreText.text = "Очки: " + _score;
+                endGamePanel.gameObject.SetActive(true);
             }
         }
     
@@ -84,7 +84,7 @@ namespace _Project.Scripts
         {
             var randomX = Random.Range(-10f, 10f);
             var randomY = Random.Range(-1f, 3f);
-            Object.Instantiate(_cookieParticlePrefab, 
+            Instantiate(cookieParticlePrefab, 
                 new Vector3(randomX, randomY, 0), Quaternion.identity, transform);
         }
     }
