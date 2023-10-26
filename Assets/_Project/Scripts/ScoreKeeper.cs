@@ -12,15 +12,44 @@ namespace _Project.Scripts
         [SerializeField] private TMP_Text scorePerClickText;
         [SerializeField] private Image endGamePanel;
         [SerializeField] private CookieParticle cookieParticlePrefab;
+        [SerializeField] private SpriteRenderer grannySpriteRenderer;
     
         private int _score;
         private int _counter;
+        private float _grannyTimer = 5f;
+        private float _invisibleTimer = 5f;
+        private bool _firstTimeGrannyVisible;
 
         private void Start()
         {
             scoreText.text = "Очки: " + _score;
         
             endGamePanel.gameObject.SetActive(false);
+            
+            grannySpriteRenderer.enabled = false;
+        }
+        
+        private void Update()
+        {
+            switch (grannySpriteRenderer.enabled)
+            {
+                case true:
+                {
+                    _grannyTimer -= Time.deltaTime;
+                    if (!(_grannyTimer <= 0)) return;
+                    grannySpriteRenderer.enabled = false;
+                    _grannyTimer = 5f;
+                    break;
+                }
+                case false when _score >= 20:
+                {
+                    _invisibleTimer -= Time.deltaTime;
+                    if (!(_invisibleTimer <= 0)) return;
+                    grannySpriteRenderer.enabled = true;
+                    _invisibleTimer = 5f;
+                    break;
+                }
+            }
         }
 
         private void OnMouseDown()
@@ -34,9 +63,10 @@ namespace _Project.Scripts
     
         private void AddScore()
         {
-            _counter++;
-            clickCounterText.text = $"Клики: {_counter}";
 
+            if (grannySpriteRenderer.enabled) return;
+            _counter++;
+            
             switch (_score)
             {
                 case < 20:
@@ -65,6 +95,10 @@ namespace _Project.Scripts
             {
                 scorePerClickText.text += "\n";
             }
+
+            if (_score < 20 || _firstTimeGrannyVisible) return;
+            grannySpriteRenderer.enabled = true;
+            _firstTimeGrannyVisible = true;
         }
 
         private void ShowScore()
@@ -76,7 +110,9 @@ namespace _Project.Scripts
             else
             {
                 scoreText.text = "Очки: " + _score;
+                clickCounterText.text = $"Клики: {_counter}";
                 endGamePanel.gameObject.SetActive(true);
+                grannySpriteRenderer.enabled = false;
             }
         }
     
