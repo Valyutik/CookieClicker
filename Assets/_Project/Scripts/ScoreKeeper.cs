@@ -7,121 +7,250 @@ namespace _Project.Scripts
 {
     public class ScoreKeeper : MonoBehaviour
     {
+        [Header("References")]
+        [SerializeField] private CookieParticle cookieParticlePrefab;
+        [SerializeField] private SpriteRenderer grannySpriteRenderer;
+        [SerializeField] public AudioClip scorePlusSound;
+        [SerializeField] public AudioClip scoreMinusSound;
+        [SerializeField] public AudioClip levelPassedSound;
+        [SerializeField] public AudioClip winningTheGameSound;
+        [SerializeField] private AudioSource audioSource;
         [SerializeField] private TMP_Text scoreText;
+        [SerializeField] private TMP_Text levelText;
         [SerializeField] private TMP_Text clickCounterText;
         [SerializeField] private TMP_Text scorePerClickText;
         [SerializeField] private Image endGamePanel;
-        [SerializeField] private CookieParticle cookieParticlePrefab;
-        [SerializeField] private SpriteRenderer grannySpriteRenderer;
+        
+        [Header("Config")]
+        [SerializeField] private uint scoreToWin1 = 100;
+        [SerializeField] private uint scoreToWin2 = 200;
+        [SerializeField] private uint scoreToWin3 = 300;
+        [SerializeField] private uint scoreSpeedUpStep = 20;
+        [Range(0f, 100f)]
+        [SerializeField] private float grannyVisibilityTime = 5f;
+        [Range(0f, 100f)]
+        [SerializeField] private float grannyInvisibilityTime = 5f;
     
+        public bool GrannyVisible { get; private set; }
+        
+        private Vector3 _grannyOriginalPosition;
+        private Transform _grannyTransform;
         private int _score;
-        private int _counter;
-        private float _grannyTimer = 5f;
-        private float _invisibleTimer = 5f;
+        private int _scoreIncrement;
+        private uint _level = 1;
+        private uint _lastScoreStep;
+        private uint _counter;
+        private float _timer;
         private bool _firstTimeGrannyVisible;
+        private bool _timerEnabled;
+        private bool _isGameOver;
+        private bool _changeLevelTo2;
+        private bool _changeLevelTo3;
+
+        #region MONO
 
         private void Start()
         {
-            scoreText.text = "Очки: " + _score;
-        
+            _grannyTransform = grannySpriteRenderer.transform;
+            _grannyOriginalPosition = _grannyTransform.position;
+            scoreText.text = "Очки: 0";
             endGamePanel.gameObject.SetActive(false);
-            
             grannySpriteRenderer.enabled = false;
         }
         
         private void Update()
         {
-            switch (grannySpriteRenderer.enabled)
-            {
-                case true:
-                {
-                    _grannyTimer -= Time.deltaTime;
-                    if (!(_grannyTimer <= 0)) return;
-                    grannySpriteRenderer.enabled = false;
-                    _grannyTimer = 5f;
-                    break;
-                }
-                case false when _score >= 20:
-                {
-                    _invisibleTimer -= Time.deltaTime;
-                    if (!(_invisibleTimer <= 0)) return;
-                    grannySpriteRenderer.enabled = true;
-                    _invisibleTimer = 5f;
-                    break;
-                }
-            }
+            TimerTick();
+            CheckRightClick();
+            if (!GrannyVisible) return;
+            var xPosition = _grannyOriginalPosition.x + Mathf.Sin(Time.time) * 0.5f;
+            var localPosition = _grannyTransform.localPosition;
+            localPosition = new Vector3(xPosition, localPosition.y, localPosition.z);
+            _grannyTransform.localPosition = localPosition;
         }
 
-        private void OnMouseDown()
+        public void OnMouseDown()
         {
-            AddScore();
-
-            ShowScore();
-
-            SpawnCookiePrefab();
-        }
-    
-        private void AddScore()
-        {
-
-            if (grannySpriteRenderer.enabled) return;
-            _counter++;
-            
-            switch (_score)
+            if (GrannyVisible && _level == 1 || _isGameOver)
             {
-                case < 20:
-                    _score++;
-                    scorePerClickText.text += "+1 ";
-                    break;
-                case < 40:
-                    _score += 2;
-                    scorePerClickText.text += "+2 ";
-                    break;
-                case < 60:
-                    _score += 3;
-                    scorePerClickText.text += "+3 ";
-                    break;
-                case < 80:
-                    _score += 4;
-                    scorePerClickText.text += "+4 ";
-                    break;
-                case < 100:
-                    _score += 5;
-                    scorePerClickText.text += "+5 ";
-                    break;
-            }
-            
-            if (_counter % 20 == 0)
-            {
-                scorePerClickText.text += "\n";
+                return;
             }
 
-            if (_score < 20 || _firstTimeGrannyVisible) return;
-            grannySpriteRenderer.enabled = true;
-            _firstTimeGrannyVisible = true;
-        }
-
-        private void ShowScore()
-        {
-            if (_score < 100)
+            if (GrannyVisible && _level > 1)
             {
-                scoreText.text = "Очки: " + _score;
+                CheckGrannyClick();
             }
             else
             {
-                scoreText.text = "Очки: " + _score;
-                clickCounterText.text = $"Клики: {_counter}";
-                endGamePanel.gameObject.SetActive(true);
-                grannySpriteRenderer.enabled = false;
+                IncreaseScoreIncrement();
+                AddScore();
+                StartGrannyLogic(); 
+                NewLine();
+                SpawnCookie();
+                CheckLevel();
+                transform.localScale *= 0.8f;
+                Invoke(nameof(EnlargeCookie), 0.1f);
+            }
+        }
+
+        #endregion
+        
+        private void EnlargeCookie()
+        {
+            transform.localScale /= 0.8f;
+        }
+        
+        private void CheckGrannyClick()
+        {
+            switch (GrannyVisible)
+            {
+                case true when _level == 2:
+                    SubScore("Клик при бабушке на уровне 2", 10);
+                    break;
+                case true when _level == 3:
+                    SubScore("Клик при бабушке на уровне 3", 20);
+                    break;
             }
         }
     
-        private void SpawnCookiePrefab()
+        private void CheckRightClick()
+        {
+            if (Input.GetMouseButtonDown(1) && _level > 1)
+            {
+                switch (_level)
+                {
+                    case 2:
+                        SubScore("Правый клик на уровне 2", 15);
+                        break;
+                    case 3:
+                        SubScore("Правый клик на уровне 3", 30);
+                        break;
+                }
+            }
+            scoreText.text = "Очки: " + _score;
+        }
+        
+        private void SubScore(string reason, int number)
+        {
+            audioSource.PlayOneShot(scorePlusSound);
+            Debug.Log(reason + ": -"  + number + " очков!");
+            _score -= number;
+            scoreText.text = "Очки: " + _score;
+        }
+        
+        private void TimerTick()
+        {
+            if (!_timerEnabled)
+            {
+                return;
+            }
+
+            _timer += Time.deltaTime;
+            TrySetActiveGranny();
+        }
+        
+        private void TrySetActiveGranny()
+        {
+            switch (GrannyVisible)
+            {
+                case true when _timer >= grannyVisibilityTime:
+                    SetActiveGranny(false);
+                    break;
+                case false when _timer >= grannyInvisibilityTime:
+                    SetActiveGranny(true);
+                    break;
+            }
+        }
+        
+        private void SetActiveGranny(bool value)
+        {
+            GrannyVisible = value;
+            grannySpriteRenderer.enabled = value;
+            ResetTimer();
+        }
+        
+        private void ResetTimer()
+        {
+            _timer = 0;
+        }
+        
+        private void NewLine()
+        {
+            if (_counter % 20 == 0 && _counter != 0)
+            {
+                scorePerClickText.text += "\n";
+            }
+        }
+        
+        private void CheckLevel()
+        {
+            if (_score >= scoreToWin1 && _score < scoreToWin2 && !_changeLevelTo2)
+            {
+                ChangeLevel(2);
+            }
+            else if (_score >= scoreToWin2 && _score < scoreToWin3 && !_changeLevelTo3)
+            {
+                ChangeLevel(3);
+            }
+            else if (_score >= scoreToWin3)
+            {
+                _isGameOver = true;
+                audioSource.PlayOneShot(winningTheGameSound);
+                _timerEnabled = false;
+                endGamePanel.gameObject.SetActive(true);
+                clickCounterText.text = $"Кол-во кликов: {_counter}";
+            }
+        }
+        
+        private void ChangeLevel(uint number)
+        {
+            if (number == _level)
+            {
+                return;
+            }
+            levelText.text = "Уровень " + number;
+            _level = number;
+            audioSource.PlayOneShot(levelPassedSound);
+            levelText.fontSize = 110;
+            Invoke(nameof(ResetLevelTextSize), 0.3f);
+        }
+
+        private void ResetLevelTextSize()
+        {
+            levelText.fontSize = 100;
+        }
+        
+        private void IncreaseScoreIncrement()
+        {
+            if (_score < _lastScoreStep) return;
+            _scoreIncrement++;
+            _lastScoreStep += scoreSpeedUpStep;
+        }
+
+        private void AddScore()
+        {
+            audioSource.PlayOneShot(scorePlusSound);
+            _score += _scoreIncrement;
+            _counter++;
+            
+            scoreText.text = "Очки: " + _score;
+            scorePerClickText.text += " + " + _scoreIncrement;
+        }
+
+        private void SpawnCookie()
         {
             var randomX = Random.Range(-10f, 10f);
-            var randomY = Random.Range(-1f, 3f);
-            Instantiate(cookieParticlePrefab, 
-                new Vector3(randomX, randomY, 0), Quaternion.identity, transform);
+            var randomY = Random.Range(-1f, 1f);
+
+            Instantiate(cookieParticlePrefab, new Vector3(randomX, randomY, 0),
+                Quaternion.identity);
+        }
+
+        private void StartGrannyLogic()
+        {
+            if (_score < 20 || _timerEnabled) return;
+            SetActiveGranny(true);
+            _timerEnabled = true;
         }
     }
 }
