@@ -133,7 +133,6 @@ namespace _Project.Scripts
         private void SubScore(string reason, int number)
         {
             audioSource.PlayOneShot(scorePlusSound);
-            Debug.Log(reason + ": -"  + number + " очков!");
             _score -= number;
             scoreText.text = "Очки: " + _score;
         }
